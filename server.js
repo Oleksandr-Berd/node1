@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const got = require("got");
 require("dotenv").config();
 const { router } = require("./booksRouter");
+const cors = require("cors");
 // const { json } = require("express");
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(morgan("tiny"));
 app.use("/api", router);
+app.use(cors());
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}, ${new Date().toISOString()}`);
