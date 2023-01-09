@@ -1,12 +1,19 @@
 const express = require("express");
 const morgan = require("morgan");
+const got = require("got");
+require("dotenv").config();
+const { router } = require("./booksRouter");
+const { json } = require("express");
 const app = express();
-const PORT = 8082;
 
+const PORT = process.env.PORT || 8082;
+const thirdPartyBaseUrl = "http://api.weatherbit.io/v2.0/current";
+const thirdPartyApiKey = process.env.WEATHER_API_KEY;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(morgan("tiny"));
+app.use("/api", router);
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}, ${new Date().toISOString()}`);
@@ -17,11 +24,40 @@ app.use((req, res, next) => {
 //   res.json({ javascript: "object" });
 // });
 
-app.post("/home", (req, res) => {
-  if (!req.body.node) {
-    return res.status(400).json({ status: "node parameter is requered" });
+app.get("/api/weather", async (req, res) => {
+  try {
+    const { latitude, longitude } = req.query;
+
+    if (!latitude) {
+      return res
+        .status(400)
+        .json({ message: "latitude parameter is mandatory" });
+    }
+
+    if (!longitude) {
+      return res
+        .status(400)
+        .json({ message: "longitude parameter is mandatory" });
+    }
+
+    const response = await got(thirdPartyBaseUrl, {
+      searchParams: {
+        key: thirdPartyApiKey,
+        lat: latitude,
+        lon: longitude,
+      },
+      responseType: "json",
+    });
+    const [weatherData] = response.body.data;
+    const {
+      city_name,
+      weather: { description },
+      temp,
+    } = weatherData;
+    res.json({ response: city_name, description, temp });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-  res.json({ javascrip: "object", body: "req.body" });
 });
 
 app.delete("/home", (req, res) => {
