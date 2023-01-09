@@ -3,7 +3,7 @@ const morgan = require("morgan");
 const got = require("got");
 require("dotenv").config();
 const { router } = require("./booksRouter");
-const { json } = require("express");
+// const { json } = require("express");
 const app = express();
 
 const PORT = process.env.PORT || 8082;
@@ -60,9 +60,9 @@ app.get("/api/weather", async (req, res) => {
   }
 });
 
-app.delete("/home", (req, res) => {
-  res.send("delete request");
-});
+// app.delete("/home", (req, res) => {
+//   res.send("delete request");
+// });
 
 // app.use((req, res) => {
 //   res.json({ javascript: "object" });
